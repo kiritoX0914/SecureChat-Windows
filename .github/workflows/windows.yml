@@ -1,0 +1,31 @@
+name: Windows build
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+      - uses: Swatinem/rust-cache@v2
+      - name: Test core
+        run: cargo test --no-default-features
+      - name: Build
+        run: cargo build --release --bin SecureChat --target x86_64-pc-windows-msvc
+      - name: Package
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist/SecureChat | Out-Null
+          Copy-Item target/x86_64-pc-windows-msvc/release/SecureChat.exe dist/SecureChat/
+          Copy-Item README.md, LICENSE dist/SecureChat/
+          Compress-Archive -Path dist/SecureChat -DestinationPath dist/SecureChat-Windows.zip
+          Get-FileHash dist/SecureChat/SecureChat.exe -Algorithm SHA256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SecureChat-Windows
+          path: dist/SecureChat/

@@ -1,0 +1,61 @@
+[package]
+name = "securechat"
+version = "1.0.0"
+edition = "2021"
+description = "SecureChat for Windows - LAN end-to-end encrypted messenger, wire-compatible with the iOS/macOS apps"
+license = "MIT"
+build = "build.rs"
+
+[lib]
+name = "securechat_core"
+path = "src/lib.rs"
+
+[[bin]]
+name = "SecureChat"
+path = "src/main.rs"
+required-features = ["gui"]
+
+[[bin]]
+name = "sc-peer"
+path = "src/bin/sc_peer.rs"
+
+[features]
+default = ["gui"]
+gui = ["dep:eframe", "dep:egui", "dep:arboard", "dep:rfd", "dep:open"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+base64 = "0.22"
+uuid = { version = "1", features = ["v4"] }
+x25519-dalek = { version = "2", features = ["static_secrets"] }
+ed25519-dalek = { version = "2", features = ["rand_core"] }
+aes-gcm = "0.10"
+hkdf = "0.12"
+hmac = "0.12"
+sha2 = "0.10"
+rand = "0.8"
+socket2 = { version = "0.5", features = ["all"] }
+if-addrs = "0.13"
+image = { version = "0.25", default-features = false, features = ["jpeg", "png", "gif", "bmp", "webp", "tiff", "ico"] }
+mime_guess = "2"
+dirs = "5"
+chrono = "0.4"
+eframe = { version = "0.31", optional = true, default-features = false, features = ["default_fonts", "glow", "persistence"] }
+egui = { version = "0.31", optional = true }
+arboard = { version = "3.4", optional = true, default-features = false, features = ["image-data"] }
+rfd = { version = "0.15", optional = true }
+open = { version = "5", optional = true }
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = ["Win32_UI_Input_KeyboardAndMouse", "Win32_Foundation"] }
+
+[build-dependencies]
+winresource = "0.1"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 4
+strip = true
+panic = "unwind"
