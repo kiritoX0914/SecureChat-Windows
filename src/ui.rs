@@ -494,14 +494,15 @@ impl App {
                         ui.label(RichText::new(core.sender_name(m, &c.id)).small().strong().color(if mine { fg } else { name_color(&m.sender_id) }));
                     }
                     if let Some(rid) = &m.reply_to_id {
-                        let qbg = if mine { Color32::from_white_alpha(40) } else if dark { Color32::from_white_alpha(18) } else { Color32::from_black_alpha(14) };
+                        let qbg = if mine { Color32::from_black_alpha(56) /* darker inset: white text stays readable on blue */ } else if dark { Color32::from_white_alpha(18) } else { Color32::from_black_alpha(14) };
                         let q = egui::Frame::new().fill(qbg).corner_radius(CornerRadius::same(6)).inner_margin(egui::Margin { left: 8, right: 8, top: 4, bottom: 4 }).show(ui, |ui| {
                             ui.set_max_width(max_w - 20.0);
                             ui.vertical(|ui| {
                                 let who = m.reply_to_sender.clone().unwrap_or_default();
                                 ui.add(egui::Label::new(RichText::new(who).small().strong().color(if mine { Color32::WHITE } else { ACCENT })).selectable(false));
                                 let t = m.reply_to_text.clone().unwrap_or_default().replace('\n', " ");
-                                ui.add(egui::Label::new(RichText::new(t).small()).selectable(false).truncate());
+                                let qfg = if mine { Color32::from_white_alpha(230) } else { ui.visuals().weak_text_color() };
+                                ui.add(egui::Label::new(RichText::new(t).small().color(qfg)).selectable(false).truncate());
                             });
                         });
                         let bar = egui::Rect::from_min_size(q.response.rect.left_top(), Vec2::new(3.0, q.response.rect.height()));
